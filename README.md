@@ -1,118 +1,98 @@
+# TP DEVOPS
 
-<b>ReactJS-Spring-Boot-Full-Stack-App</b>
-<hr>
+![Java](https://img.shields.io/badge/Java-11-blue)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-2.7-green)
+![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
 
-This project consists of two applications: one is a Spring Boot Rest API
-called spring-backend and another is a ReactJS application called
-react-frontend.
+## 📝 Description
 
-Service-oriented platform focusing on establishing and maintaining
-connections between consumers and small businesses in the The Arts,
-Entertainment, and Recreation sector.
+// TODO
 
-Click [here](https://www.hobbie.ch) to view the application.
-This application is subject to Copyright.
+## 🏗️ Architecture
 
-<b>Applications</b>
-<hr>
+- **Backend** : Spring Boot 2.7.x
+- **Base de données** : MySQL
+- **Build** : Maven
+- **Java** : 11
 
- <b> - spring-backend</b>
+## 🚀 Installation et lancement
 
-Spring Boot Web Java backend application that exposes a REST API to
-manage hobbies. Its secured endpoints can just be accessed if an access
-token (JWT) is provided.
+### Prérequis
 
-spring-backend stores its data in a MySql database.
+- Java 11+
+- Maven 3.6+
+- MySQL
 
-spring-backend has the following endpoints
+### Cloner le projet
+```bash
+git clone https://github.com/chefm0ha/TP-devops
+cd /TP-devops
+```
 
+### Compiler et lancer
+```bash
+# Compiler
+mvn clean install
 
-<b>-react-frontend</b>
+# Lancer l'application
+mvn spring-boot:run
 
-ReactJS frontend application where users can find and save hobbies and businesses can manage offers. In order to access the application, user / business must login using his/her username and password.  All the requests coming from react-frontend to secured endpoints in spring-backend have a access token (JWT) that is generated when user / business logs in.
+# Ou avec le JAR
+java -jar target/app.jar
+```
 
-react-frontend uses Semantic UI React as CSS-styled framework.
+L'application sera accessible sur `http://localhost:8080`
 
-<b>Prerequisites</b>
-<hr>
+## 🧪 Tests
+```bash
+# Lancer les tests unitaires
+mvn test
 
--Java 11+
+# Lancer les tests avec coverage
+mvn test jacoco:report
+```
 
--npm
+## 📦 Build Docker
+```bash
+docker build -t spring-app:latest .
+docker run -p 8080:8080 spring-app:latest
+```
 
--JWT 
+## 🔧 Configuration
 
-<b>Set up</b>
+Les configurations se trouvent dans `src/main/resources/application.properties`
 
-<hr></hr>
+Principales propriétés :
+```properties
+server.port=8080
+spring.datasource.url=jdbc:mysql://localhost:3306/db
+```
 
-Clone the repository:
+## 📊 DevOps Pipeline
 
-<pre>git clone https://github.com/purshink/ReactJS-Spring-Boot-Full-Stack-App.git</pre>
+Ce projet utilise une pipeline CI/CD complète :
 
-Navigate to the newly created folder:
+- **GitHub** : Gestion du code source (Git Flow)
+- **Jenkins** : CI/CD automatisé
+- **SonarQube** : Analyse de qualité du code
+- **Docker** : Containerisation
+- **Kubernetes** : Orchestration et déploiement
+- **Prometheus + Grafana** : Monitoring
 
-<pre>cd  ReactJS-Spring-Boot-Full-Stack-App</pre>
- 
+Voir `docs/` pour plus de détails.
 
-<b>Frontend -</b>
+## 📄 Documentation
 
-Install NodeJs.v.16.13.1 /npm v.8.3.0
+- [Stratégie Git](docs/git-strategy.md)
+- [Pipeline CI/CD](docs/pipeline.md) (à créer)
+- [Guide de déploiement](docs/deployment.md) (à créer)
 
-Navigate to react-frontend subfolder:
- 
-<pre>cd react-frontend</pre>
+## 👥 Équipe
 
-Install the modules
+- **Membre 1** : Mohammed Fadlouallah - [Github - chefm0ha](https://github.com/chefm0ha)
 
-<pre>npm i</pre>
+- **Membre 2** : Aymane Jamal - [Github - AymaneJamal](https://github.com/AymaneJamal)
 
-Start the application on local host:
+## 📅 Historique des versions
 
-<pre>npm start</pre>
-
-Navigate to:
-
-http://localhost:4200
-
- 
-<b>Backend -</b>
-Install JDK 11.0.11
-Install docker -v 20.10.7
-Install docker-compose -v 1.8.0
-
-Navigate to spring-backend subfolder:
-
-<pre>cd spring-backend</pre>
-
-Run the project with:
-
-<pre>docker-compose up --build</pre>
-
-
-The project has the following endpoints:
-
-IMPORTANT: to explore api enter url:  /v3/api-docs
-
-http://localhost:8080/swagger-ui/index.html
-
-
-NOTE: Testing API 
-
--/signup (create client-user) or /register (create business-user)
-
--/authenticate (returns JWT authentication token)
-
--use JWT token in order to authorize access to secured endpoints (click the lock icon or use the Authorize button on the upper right corner - then paste JWT Token )
-
-NOTE: /notification endpoint will return an internal server error if you don't specify spring.mail credentials first.
-
-<pre>The backend will run on http://localhost:8080 </pre>
-
-<b>Spring Mail</b>
-
-Make sure to specify a valid spring.mail.username and spring.mail.password in the application.properties file in order to be able to send an Email confirmation for updating user entries.
-
-IMPORTANT: if you decide not to specify mail credentials, you will get javax.mail.AuthenticationFailedException. The rest of the application should work normally despite this exception.
-
-
+- **v1.0.0** (2025-XX-XX) : Version initiale avec pipeline DevOps complète

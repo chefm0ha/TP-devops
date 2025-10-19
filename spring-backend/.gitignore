@@ -79,7 +79,6 @@ build/
 # 🧾 Logs & Temp files
 # ==========================
 logs/
-*.log
 tmp/
 temp/
 
@@ -90,6 +89,16 @@ temp/
 .env.local
 secrets/
 application-secret.properties
+
+# ===========================
+# DOCKER
+# ===========================
+jenkins_home/
+sonarqube_data/
+sonarqube_extensions/
+sonarqube_logs/
+postgresql_data/
+docker-compose.override.yml
 
 # ==========================
 # 📚 Misc
