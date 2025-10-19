@@ -9,7 +9,6 @@ import backend.hobbiebackend.model.entities.enums.UserRoleEnum;
 import backend.hobbiebackend.model.repostiory.AppClientRepository;
 import backend.hobbiebackend.model.repostiory.BusinessOwnerRepository;
 import backend.hobbiebackend.model.repostiory.UserRepository;
-import backend.hobbiebackend.model.repostiory.UserRoleRepository;
 import backend.hobbiebackend.service.UserRoleService;
 import backend.hobbiebackend.service.UserService;
 import org.modelmapper.ModelMapper;

@@ -27,10 +27,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-
 @RestController
 @CrossOrigin(origins = "http://localhost:4200")
 public class UserController {
@@ -54,7 +50,6 @@ public class UserController {
     @PostMapping("/signup")
     @Operation(summary = "Create new client-user")
     public ResponseEntity<?> signup(@RequestBody AppClientSignUpDto user) {
-        System.out.println(user);
         if (this.userService.userExists(user.getUsername(), user.getEmail())) {
             throw new RuntimeException("Username or email address already in use.");
         }
@@ -92,7 +87,7 @@ public class UserController {
         client.setGender(user.getGender());
         client.setFullName(user.getFullName());
         this.userService.saveUpdatedUserClient(client);
-        return new ResponseEntity<AppClient>(client, HttpStatus.CREATED);
+        return new ResponseEntity<>(client, HttpStatus.CREATED);
     }
 
     @PostMapping("/notification")
@@ -113,7 +108,7 @@ public class UserController {
         UserEntity userById = this.userService.findUserById(id);
         userById.setPassword(this.passwordEncoder.encode(password));
         this.userService.saveUserWithUpdatedPassword(userById);
-        return new ResponseEntity<UserEntity>(userById, HttpStatus.CREATED);
+        return new ResponseEntity<>(userById, HttpStatus.CREATED);
     }
 
     @PutMapping("/business")
@@ -128,7 +123,7 @@ public class UserController {
         businessOwner.setAddress(business.getAddress());
         this.userService.saveUpdatedUser(businessOwner);
 
-        return new ResponseEntity<BusinessOwner>(businessOwner, HttpStatus.CREATED);
+        return new ResponseEntity<>(businessOwner, HttpStatus.CREATED);
     }
 
     @DeleteMapping("/user/{id}")
@@ -144,6 +139,10 @@ public class UserController {
     @PostMapping("/authenticate")
     @Operation(summary = "Authenticate user and get JWT Token")
     public JwtResponse authenticate(@RequestBody JwtRequest jwtRequest) throws Exception {
+        System.out.println("=== AUTHENTICATION DEBUG ===");
+        System.out.println("Username received: " + jwtRequest.getUsername());
+        System.out.println("Password received (length): " + jwtRequest.getPassword().length());
+
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -151,9 +150,13 @@ public class UserController {
                             jwtRequest.getPassword()
                     )
             );
+            System.out.println("Authentication SUCCESS for: " + jwtRequest.getUsername());
         } catch (BadCredentialsException e) {
+            System.out.println("Authentication FAILED for: " + jwtRequest.getUsername());
+            System.out.println("Error: " + e.getMessage());
             throw new Exception("INVALID_CREDENTIALS", e);
         }
+
         final UserDetails userDetails
                 = hobbieUserDetailsService.loadUserByUsername(jwtRequest.getUsername());
 
