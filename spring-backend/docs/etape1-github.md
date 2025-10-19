@@ -117,4 +117,4 @@ Configuration appliquée sur GitHub :
 ---
 
 **Date de rédaction** : 1910/2025  
-**Auteurs** : chefm0ha
+**Auteur** : chefm0ha
