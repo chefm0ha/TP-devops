@@ -142,4 +142,4 @@ feature/y         o---o---o (merge)
 ---
 
 **Date de création** : 19/10/2025  
-**Auteurs** : Mohammed Fadlouallah  
+**Auteur** : chefm0ha  
