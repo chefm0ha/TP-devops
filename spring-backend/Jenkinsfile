@@ -7,16 +7,8 @@ pipeline {
     }
 
     environment {
-        // Configuration du projet
         PROJECT_NAME = 'spring-boot-app'
-        MAVEN_OPTS = '-Dmaven.test.failure.ignore=true'
-
-        // SonarQube
         SONAR_HOST_URL = 'http://sonarqube:9000'
-
-        // Docker (pour plus tard)
-        DOCKER_IMAGE = 'chefmoha/spring-app'
-        DOCKER_TAG = "${BUILD_NUMBER}"
     }
 
     stages {
@@ -26,18 +18,32 @@ pipeline {
                 echo '📥 ÉTAPE 1: Clonage du repository'
                 echo '========================================='
 
-                // Git clone automatique par Jenkins
                 checkout scm
 
-                // Afficher les informations du commit
+                // Vérifier la structure du projet
+                sh '''
+                    echo "📁 Contenu de la racine:"
+                    ls -la
+
+                    echo ""
+                    echo "📁 Contenu de spring-backend:"
+                    ls -la spring-backend/
+
+                    echo ""
+                    echo "📄 Vérification du pom.xml:"
+                    if [ -f spring-backend/pom.xml ]; then
+                        echo "✅ pom.xml trouvé dans spring-backend/"
+                    else
+                        echo "❌ pom.xml NON trouvé!"
+                        exit 1
+                    fi
+                '''
+
                 script {
                     def gitCommit = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
                     def gitBranch = sh(returnStdout: true, script: 'git rev-parse --abbrev-ref HEAD').trim()
-                    def gitAuthor = sh(returnStdout: true, script: 'git log -1 --pretty=format:"%an"').trim()
-
                     echo "📌 Branch: ${gitBranch}"
                     echo "📌 Commit: ${gitCommit}"
-                    echo "📌 Author: ${gitAuthor}"
                 }
             }
         }
@@ -48,22 +54,23 @@ pipeline {
                 echo '🔨 ÉTAPE 2: Compilation du projet'
                 echo '========================================='
 
-                script {
-                    try {
-                        sh '''
-                            echo "🔍 Version de Maven:"
-                            mvn --version
+                sh '''
+                    cd spring-backend
 
-                            echo "🔍 Version de Java:"
-                            java -version
+                    echo "📁 Répertoire actuel: $(pwd)"
+                    echo ""
 
-                            echo "🏗️ Compilation en cours..."
-                            mvn clean compile -DskipTests
-                        '''
-                    } catch (Exception e) {
-                        error("❌ La compilation a échoué: ${e.message}")
-                    }
-                }
+                    echo "🔍 Version de Maven:"
+                    mvn --version
+                    echo ""
+
+                    echo "🔍 Version de Java:"
+                    java -version
+                    echo ""
+
+                    echo "🏗️ Compilation en cours..."
+                    mvn clean compile -DskipTests
+                '''
             }
         }
 
@@ -73,22 +80,16 @@ pipeline {
                 echo '🧪 ÉTAPE 3: Exécution des tests unitaires'
                 echo '========================================='
 
-                script {
-                    try {
-                        sh '''
-                            echo "🧪 Lancement des tests..."
-                            mvn test
-                        '''
-                    } catch (Exception e) {
-                        echo "⚠️ Certains tests ont échoué, mais on continue..."
-                    }
-                }
+                sh '''
+                    cd spring-backend
+
+                    echo "🧪 Lancement des tests..."
+                    mvn test || true
+                '''
             }
             post {
                 always {
-                    // Publier les résultats des tests
-                    junit allowEmptyResults: true, testResults: '**/target/surefire-reports/*.xml'
-
+                    junit allowEmptyResults: true, testResults: 'spring-backend/**/target/surefire-reports/*.xml'
                     echo "📊 Résultats des tests publiés"
                 }
             }
@@ -100,25 +101,21 @@ pipeline {
                 echo '📦 ÉTAPE 4: Génération du package JAR'
                 echo '========================================='
 
-                script {
-                    try {
-                        sh '''
-                            echo "📦 Création du package..."
-                            mvn package -DskipTests
+                sh '''
+                    cd spring-backend
 
-                            echo "✅ Package créé avec succès!"
-                            ls -lh target/*.jar
-                        '''
-                    } catch (Exception e) {
-                        error("❌ La création du package a échoué: ${e.message}")
-                    }
-                }
+                    echo "📦 Création du package..."
+                    mvn package -DskipTests
+
+                    echo ""
+                    echo "✅ Package créé avec succès!"
+                    ls -lh target/*.jar
+                '''
             }
             post {
                 success {
-                    // Archiver le JAR généré
-                    archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
-                    echo "📦 Artifact archivé: target/*.jar"
+                    archiveArtifacts artifacts: 'spring-backend/**/target/*.jar', fingerprint: true
+                    echo "📦 Artifact archivé: spring-backend/target/*.jar"
                 }
             }
         }
@@ -131,9 +128,10 @@ pipeline {
 
                 script {
                     try {
-                        // Analyse avec SonarQube
                         withSonarQubeEnv('SonarQube') {
                             sh '''
+                                cd spring-backend
+
                                 echo "🔍 Analyse SonarQube en cours..."
                                 mvn sonar:sonar \
                                     -Dsonar.projectKey=spring-boot-app \
@@ -161,8 +159,7 @@ pipeline {
                             def qg = waitForQualityGate()
                             if (qg.status != 'OK') {
                                 echo "⚠️ Quality Gate status: ${qg.status}"
-                                echo "⚠️ Le Quality Gate n'est pas passé, mais on continue pour le TP"
-                                // unstable(message: "Quality Gate failed: ${qg.status}")
+                                echo "ℹ️ Pour le TP, on continue malgré le Quality Gate"
                             } else {
                                 echo "✅ Quality Gate passé avec succès!"
                             }
@@ -182,7 +179,7 @@ pipeline {
             echo '✅ PIPELINE RÉUSSIE!'
             echo '========================================='
             echo "✅ Build #${BUILD_NUMBER} terminé avec succès"
-            echo "📦 Artifact disponible dans Jenkins"
+            echo "📦 Artifact disponible: spring-backend/target/*.jar"
             echo "🔍 Rapport SonarQube: ${SONAR_HOST_URL}/dashboard?id=spring-boot-app"
         }
 
@@ -191,21 +188,14 @@ pipeline {
             echo '❌ PIPELINE ÉCHOUÉE!'
             echo '========================================='
             echo "❌ Build #${BUILD_NUMBER} a échoué"
-            echo "📋 Consultez les logs pour plus de détails"
+            echo "📋 Consultez les logs ci-dessus pour plus de détails"
         }
 
         always {
             echo '========================================='
             echo '🧹 Nettoyage'
             echo '========================================='
-
-            // Nettoyage des fichiers temporaires
-            cleanWs(
-                deleteDirs: true,
-                patterns: [
-                    [pattern: 'target/', type: 'INCLUDE']
-                ]
-            )
+            echo "Pipeline terminé"
         }
     }
 }
