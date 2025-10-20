@@ -151,13 +151,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-            <version>6.4</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-test</artifactId>
             <version>5.1.1.RELEASE</version>
@@ -181,10 +174,14 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.22.2</version>
                 <configuration>
-                    <argLine>
-                        --add-opens java.base/java.time=ALL-UNNAMED
-                    </argLine>
+                    <!-- Forcer l'utilisation de JUnit -->
+                    <testFailureIgnore>false</testFailureIgnore>
+                    <includes>
+                        <include>**/*Test.java</include>
+                        <include>**/*Tests.java</include>
+                    </includes>
                 </configuration>
             </plugin>
 
