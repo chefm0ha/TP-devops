@@ -9,6 +9,7 @@ pipeline {
     environment {
         PROJECT_NAME = 'spring-boot-app'
         SONAR_HOST_URL = 'http://sonarqube:9000'
+        GIT_BRANCH = 'develop'
     }
 
     stages {
@@ -74,17 +75,28 @@ pipeline {
             }
         }
 
-        stage('🧪 Tests') {
+        stage('🧪 Tests & Coverage') {
             steps {
                 echo '========================================='
-                echo '🧪 ÉTAPE 3: Exécution des tests unitaires'
+                echo '🧪 ÉTAPE 3: Tests unitaires + Couverture'
                 echo '========================================='
 
                 sh '''
                     cd spring-backend
 
-                    echo "🧪 Lancement des tests..."
-                    mvn test || true
+                    echo "🧪 Lancement des tests avec JaCoCo..."
+                    mvn test
+
+                    echo ""
+                    echo "📊 Vérification du rapport JaCoCo..."
+                    if [ -f target/site/jacoco/jacoco.xml ]; then
+                        echo "✅ Rapport JaCoCo généré avec succès!"
+                        echo "📄 Emplacement: target/site/jacoco/jacoco.xml"
+                        ls -lh target/site/jacoco/
+                    else
+                        echo "❌ ERREUR: Rapport JaCoCo non trouvé!"
+                        echo "⚠️  La couverture ne sera pas disponible dans SonarQube"
+                    fi
                 '''
             }
             post {
@@ -109,6 +121,7 @@ pipeline {
 
                     echo ""
                     echo "✅ Package créé avec succès!"
+                    echo "📄 Fichiers générés:"
                     ls -lh target/*.jar
                 '''
             }
@@ -132,11 +145,22 @@ pipeline {
                             sh '''
                                 cd spring-backend
 
+                                echo "🔍 Vérification des rapports avant analyse..."
+                                if [ -f target/site/jacoco/jacoco.xml ]; then
+                                    echo "✅ Rapport JaCoCo trouvé"
+                                else
+                                    echo "⚠️  Rapport JaCoCo manquant"
+                                fi
+
+                                echo ""
                                 echo "🔍 Analyse SonarQube en cours..."
                                 mvn sonar:sonar \
                                     -Dsonar.projectKey=spring-boot-app \
                                     -Dsonar.projectName='Spring Boot App' \
-                                    -Dsonar.host.url=${SONAR_HOST_URL}
+                                    -Dsonar.host.url=http://sonarqube:9000
+
+                                echo ""
+                                echo "✅ Analyse SonarQube terminée!"
                             '''
                         }
                     } catch (Exception e) {
@@ -150,7 +174,7 @@ pipeline {
         stage('✅ Quality Gate') {
             steps {
                 echo '========================================='
-                echo '✅ Vérification du Quality Gate'
+                echo '✅ ÉTAPE 6: Vérification du Quality Gate'
                 echo '========================================='
 
                 script {
@@ -181,6 +205,9 @@ pipeline {
             echo "✅ Build #${BUILD_NUMBER} terminé avec succès"
             echo "📦 Artifact disponible: spring-backend/target/*.jar"
             echo "🔍 Rapport SonarQube: ${SONAR_HOST_URL}/dashboard?id=spring-boot-app"
+            echo "📊 Rapport de tests: ${BUILD_URL}testReport/"
+            echo ""
+            echo "🎉 Toutes les étapes ont été complétées!"
         }
 
         failure {
@@ -189,13 +216,23 @@ pipeline {
             echo '========================================='
             echo "❌ Build #${BUILD_NUMBER} a échoué"
             echo "📋 Consultez les logs ci-dessus pour plus de détails"
+            echo "🔗 Lien vers le build: ${BUILD_URL}"
+        }
+
+        unstable {
+            echo '========================================='
+            echo '⚠️  PIPELINE INSTABLE'
+            echo '========================================='
+            echo "⚠️  Build #${BUILD_NUMBER} est instable"
+            echo "📋 Vérifiez les tests ou le Quality Gate"
         }
 
         always {
             echo '========================================='
-            echo '🧹 Nettoyage'
+            echo '🧹 NETTOYAGE'
             echo '========================================='
-            echo "Pipeline terminé"
+            echo "Pipeline terminé à: ${new Date()}"
+            echo "Durée totale: ${currentBuild.durationString}"
         }
     }
 }

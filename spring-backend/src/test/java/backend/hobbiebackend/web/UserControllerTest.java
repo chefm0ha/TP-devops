@@ -32,6 +32,7 @@ import java.util.List;
 
 import static org.mockito.Mockito.when;
 
+@ActiveProfiles("test")
 @SpringBootTest
 @AutoConfigureMockMvc
 class UserControllerTest extends AbstractTest {

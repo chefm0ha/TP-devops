@@ -17,7 +17,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.modelmapper.ModelMapper;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -39,7 +38,7 @@ class UserServiceTest {
     private BusinessRegisterDto businessRegisterDto;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         mockUserRepository = mock(UserRepository.class);
         mockAppClientRepository = mock(AppClientRepository.class);
         HobbyRepository mockHobbyRepository = mock(HobbyRepository.class);
