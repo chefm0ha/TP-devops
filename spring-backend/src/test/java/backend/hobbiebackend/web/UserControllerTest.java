@@ -13,7 +13,6 @@ import backend.hobbiebackend.model.entities.enums.UserRoleEnum;
 import backend.hobbiebackend.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -25,9 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
@@ -35,7 +32,6 @@ import java.util.List;
 
 import static org.mockito.Mockito.when;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
 class UserControllerTest extends AbstractTest {
@@ -51,6 +47,7 @@ class UserControllerTest extends AbstractTest {
     @MockBean
     private UserService userService;
 
+    @Override
     @BeforeEach
     public void setUp() {
         ModelMapper modelMapper = new ModelMapper();
@@ -103,12 +100,12 @@ class UserControllerTest extends AbstractTest {
     }
 
     @Test
-    public void contextLoads() {
+    void contextLoads() {
         assertThat(controller).isNotNull();
     }
 
     @Test
-    public void signup_should_work() throws Exception {
+    void signup_should_work() throws Exception {
         String uri = "/signup";
 
         String inputJson = super.mapToJson(appClientSignUpDto);
@@ -120,7 +117,7 @@ class UserControllerTest extends AbstractTest {
     }
 
     @Test
-    public void register_business_should_work() throws Exception {
+    void register_business_should_work() throws Exception {
         String uri = "/register";
 
         String inputJson = super.mapToJson(businessRegisterDto);
@@ -132,7 +129,7 @@ class UserControllerTest extends AbstractTest {
     }
 
     @Test
-    public void update_user_should_work() throws Exception {
+    void update_user_should_work() throws Exception {
         String uri = "/user";
 
         String inputJson = super.mapToJson(updateAppClientDto);
@@ -148,7 +145,7 @@ class UserControllerTest extends AbstractTest {
     }
 
     @Test
-    public void update_business_should_work() throws Exception {
+    void update_business_should_work() throws Exception {
         String uri = "/business";
 
         String inputJson = super.mapToJson(updateBusinessDto);
@@ -163,7 +160,7 @@ class UserControllerTest extends AbstractTest {
     }
 
     @Test
-    public void delete_user_should_work_when_not_found() throws Exception {
+    void delete_user_should_work_when_not_found() throws Exception {
         String uri = "/user/1";
         Long id = 1L;
 
@@ -178,7 +175,7 @@ class UserControllerTest extends AbstractTest {
     }
 
     @Test
-    public void delete_user_should_work() throws Exception {
+    void delete_user_should_work() throws Exception {
         String uri = "/user/1";
         Long id = 1L;
 

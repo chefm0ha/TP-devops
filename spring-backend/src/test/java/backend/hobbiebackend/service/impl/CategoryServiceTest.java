@@ -19,7 +19,7 @@ class CategoryServiceTest {
     private Category category;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         mockCategoryRepository = mock(CategoryRepository.class);
         categoryServiceTest = new CategoryServiceImpl(mockCategoryRepository);
         category = new Category();

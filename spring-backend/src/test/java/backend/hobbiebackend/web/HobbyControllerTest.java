@@ -9,30 +9,25 @@ import backend.hobbiebackend.service.HobbyService;
 import backend.hobbiebackend.service.UserService;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
 public class HobbyControllerTest extends AbstractTest {
@@ -42,6 +37,7 @@ public class HobbyControllerTest extends AbstractTest {
     private HobbyInfoUpdateDto hobbyInfoUpdateDto;
     private Hobby hobby;
 
+    @Override
     @Before
     public void setUp() {
         // prepare data
@@ -117,7 +113,6 @@ public class HobbyControllerTest extends AbstractTest {
         hobby.setLocation(location);
         AppClient client = new AppClient();
         client.setUsername("user");
-        String username = "user";
         List<Hobby> hobbies = new ArrayList<>();
         hobby = new Hobby();
         hobbies.add(hobby);

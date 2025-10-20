@@ -25,7 +25,6 @@ import static org.mockito.Mockito.*;
 
 class HobbyServiceImplTest {
     private HobbyRepository mockHobbyRepository;
-    private NotificationService notificationService;
     private HobbyService hobbyServiceToTest;
     private AppClient appClient;
     private Hobby hobby;

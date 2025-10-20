@@ -21,7 +21,7 @@ class LocationServiceImplTest {
     private Location location;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         mockLocationRepository = mock(LocationRepository.class);
         locationServiceToTest = new LocationServiceImpl(mockLocationRepository);
         location = new Location();

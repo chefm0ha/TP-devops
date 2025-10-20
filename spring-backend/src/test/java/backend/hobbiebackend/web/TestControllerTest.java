@@ -5,7 +5,6 @@ import backend.hobbiebackend.model.entities.enums.LocationEnum;
 import backend.hobbiebackend.service.TestService;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -13,14 +12,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
 public class TestControllerTest extends AbstractTest {
@@ -28,6 +26,7 @@ public class TestControllerTest extends AbstractTest {
     private TestController controller;
     private backend.hobbiebackend.model.entities.Test results;
 
+    @Override
     @Before
     public void setUp() {
         results = new backend.hobbiebackend.model.entities.Test();
