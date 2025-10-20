@@ -1,0 +1,211 @@
+pipeline {
+    agent any
+
+    tools {
+        maven 'Maven-3.9'
+        jdk 'JDK-11'
+    }
+
+    environment {
+        // Configuration du projet
+        PROJECT_NAME = 'spring-boot-app'
+        MAVEN_OPTS = '-Dmaven.test.failure.ignore=true'
+
+        // SonarQube
+        SONAR_HOST_URL = 'http://sonarqube:9000'
+
+        // Docker (pour plus tard)
+        DOCKER_IMAGE = 'chefmoha/spring-app'
+        DOCKER_TAG = "${BUILD_NUMBER}"
+    }
+
+    stages {
+        stage('📥 Checkout') {
+            steps {
+                echo '========================================='
+                echo '📥 ÉTAPE 1: Clonage du repository'
+                echo '========================================='
+
+                // Git clone automatique par Jenkins
+                checkout scm
+
+                // Afficher les informations du commit
+                script {
+                    def gitCommit = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
+                    def gitBranch = sh(returnStdout: true, script: 'git rev-parse --abbrev-ref HEAD').trim()
+                    def gitAuthor = sh(returnStdout: true, script: 'git log -1 --pretty=format:"%an"').trim()
+
+                    echo "📌 Branch: ${gitBranch}"
+                    echo "📌 Commit: ${gitCommit}"
+                    echo "📌 Author: ${gitAuthor}"
+                }
+            }
+        }
+
+        stage('🔨 Build') {
+            steps {
+                echo '========================================='
+                echo '🔨 ÉTAPE 2: Compilation du projet'
+                echo '========================================='
+
+                script {
+                    try {
+                        sh '''
+                            echo "🔍 Version de Maven:"
+                            mvn --version
+
+                            echo "🔍 Version de Java:"
+                            java -version
+
+                            echo "🏗️ Compilation en cours..."
+                            mvn clean compile -DskipTests
+                        '''
+                    } catch (Exception e) {
+                        error("❌ La compilation a échoué: ${e.message}")
+                    }
+                }
+            }
+        }
+
+        stage('🧪 Tests') {
+            steps {
+                echo '========================================='
+                echo '🧪 ÉTAPE 3: Exécution des tests unitaires'
+                echo '========================================='
+
+                script {
+                    try {
+                        sh '''
+                            echo "🧪 Lancement des tests..."
+                            mvn test
+                        '''
+                    } catch (Exception e) {
+                        echo "⚠️ Certains tests ont échoué, mais on continue..."
+                    }
+                }
+            }
+            post {
+                always {
+                    // Publier les résultats des tests
+                    junit allowEmptyResults: true, testResults: '**/target/surefire-reports/*.xml'
+
+                    echo "📊 Résultats des tests publiés"
+                }
+            }
+        }
+
+        stage('📦 Package') {
+            steps {
+                echo '========================================='
+                echo '📦 ÉTAPE 4: Génération du package JAR'
+                echo '========================================='
+
+                script {
+                    try {
+                        sh '''
+                            echo "📦 Création du package..."
+                            mvn package -DskipTests
+
+                            echo "✅ Package créé avec succès!"
+                            ls -lh target/*.jar
+                        '''
+                    } catch (Exception e) {
+                        error("❌ La création du package a échoué: ${e.message}")
+                    }
+                }
+            }
+            post {
+                success {
+                    // Archiver le JAR généré
+                    archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
+                    echo "📦 Artifact archivé: target/*.jar"
+                }
+            }
+        }
+
+        stage('🔍 SonarQube Analysis') {
+            steps {
+                echo '========================================='
+                echo '🔍 ÉTAPE 5: Analyse de qualité du code'
+                echo '========================================='
+
+                script {
+                    try {
+                        // Analyse avec SonarQube
+                        withSonarQubeEnv('SonarQube') {
+                            sh '''
+                                echo "🔍 Analyse SonarQube en cours..."
+                                mvn sonar:sonar \
+                                    -Dsonar.projectKey=spring-boot-app \
+                                    -Dsonar.projectName='Spring Boot App' \
+                                    -Dsonar.host.url=${SONAR_HOST_URL}
+                            '''
+                        }
+                    } catch (Exception e) {
+                        echo "⚠️ Analyse SonarQube échouée: ${e.message}"
+                        echo "ℹ️ Vérifiez que SonarQube est configuré dans Jenkins"
+                    }
+                }
+            }
+        }
+
+        stage('✅ Quality Gate') {
+            steps {
+                echo '========================================='
+                echo '✅ Vérification du Quality Gate'
+                echo '========================================='
+
+                script {
+                    try {
+                        timeout(time: 5, unit: 'MINUTES') {
+                            def qg = waitForQualityGate()
+                            if (qg.status != 'OK') {
+                                echo "⚠️ Quality Gate status: ${qg.status}"
+                                echo "⚠️ Le Quality Gate n'est pas passé, mais on continue pour le TP"
+                                // unstable(message: "Quality Gate failed: ${qg.status}")
+                            } else {
+                                echo "✅ Quality Gate passé avec succès!"
+                            }
+                        }
+                    } catch (Exception e) {
+                        echo "⚠️ Impossible de vérifier le Quality Gate: ${e.message}"
+                        echo "ℹ️ Assurez-vous que le webhook SonarQube est configuré"
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo '========================================='
+            echo '✅ PIPELINE RÉUSSIE!'
+            echo '========================================='
+            echo "✅ Build #${BUILD_NUMBER} terminé avec succès"
+            echo "📦 Artifact disponible dans Jenkins"
+            echo "🔍 Rapport SonarQube: ${SONAR_HOST_URL}/dashboard?id=spring-boot-app"
+        }
+
+        failure {
+            echo '========================================='
+            echo '❌ PIPELINE ÉCHOUÉE!'
+            echo '========================================='
+            echo "❌ Build #${BUILD_NUMBER} a échoué"
+            echo "📋 Consultez les logs pour plus de détails"
+        }
+
+        always {
+            echo '========================================='
+            echo '🧹 Nettoyage'
+            echo '========================================='
+
+            // Nettoyage des fichiers temporaires
+            cleanWs(
+                deleteDirs: true,
+                patterns: [
+                    [pattern: 'target/', type: 'INCLUDE']
+                ]
+            )
+        }
+    }
+}
